@@ -170,10 +170,3 @@ def suppression_valeur(grille_a_vider, nombre_valeur_a_supprimer):
             else:
                 break # sinon il s'arrete la et renvoie la grille comme elle est
     return grille_vider
-
-grille = grille_remplie()
-
-grille = suppression_valeur(grille,64)
-
-for ligne in grille:
-    print(ligne)

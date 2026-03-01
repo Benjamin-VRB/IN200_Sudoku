@@ -4,7 +4,7 @@ fichier_sauvergarde = "Sauvegardes/grilles_jouees.json"
 
 def sauvegarde (grille, temps, difficulte, score):
     
-    #On charge l'historique si elle existe ou on le crée  
+    #On charge l'historique
     lecture=open(fichier_sauvergarde, "r")
     liste_parties = json.load(lecture)
     lecture.close()
