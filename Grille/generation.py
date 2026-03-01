@@ -1,7 +1,7 @@
 import random
 import copy
 import math
-from verification import compte_solutions
+from verification import compte_solution_V3
 
 dictionnaire_liste_ligne = {}
 dictionnaire_liste_colonne = {}
@@ -83,56 +83,32 @@ def grille_remplie(nombre_de_valeur):
     
     return (grille)
 
-def suppression_valeur(grille_a_vider, nombre_valeur_a_supprimer, nombre_de_valeur):
-    
-    grille_vider = copy.deepcopy(grille_a_vider)  # copie de la grille envoyant à une autre liste indépendante 
-    nombre_case_supprimer = 0
-    positions = [(i,e) for i in range(nombre_de_valeur) for e in range(nombre_de_valeur)]
-    
-    while nombre_case_supprimer < nombre_valeur_a_supprimer: # on tente de supprimer tent que on est pas au nombre de case voulu
-        position_tente = random.choice(positions)
-        ligne, colonne = position_tente[0], position_tente[1]
-        symetrique_ligne, symetrique_colonne = nombre_de_valeur-ligne-1, nombre_de_valeur-1-colonne  # coordonnées du symétrique
-        valeur_1 = grille_vider[ligne][colonne] # sauvegarde des valeurs avant suppression
-        valeur_2 = grille_vider[symetrique_ligne][symetrique_colonne] # sauvegarde du symétrique par rapport au centre pour pouvoire supprimer de case par deux
-        grille_test = copy.deepcopy(grille_vider) # on tente la suppression
-        grille_test[ligne][colonne] = 0
-        grille_test[symetrique_ligne][symetrique_colonne] = 0
-        
-        if compte_solutions(grille_test, nombre_de_valeur) == 1: # verifie l'unicité de la solution
-            grille_vider = grille_test
-            nombre_case_supprimer += 2
-            positions.remove(position_tente)
-            if (symetrique_ligne, symetrique_colonne) in positions: # on retire le symétrique si il est dans les positions
-                positions.remove((symetrique_ligne, symetrique_colonne))
-    
+def suppression_valeur(grille_complete, nombre_valeur_a_supprimer, nombre_de_valeur):
+    grille_vider = copy.deepcopy(grille_complete)
+    positions = [(ligne, colonne) for ligne in range(nombre_de_valeur) for colonne in range(nombre_de_valeur)]
+    random.shuffle(positions)
+
+    nombre_case_supprime = 0
+
+    while nombre_case_supprime < nombre_valeur_a_supprimer:
+        if not positions:
+            # plus de positions → recommence avec nouvelle grille
+            if (nombre_case_supprime - nombre_valeur_a_supprimer) > 10:   
+                return suppression_valeur(grille_remplie(nombre_de_valeur), nombre_valeur_a_supprimer, nombre_de_valeur)
+            else:
+                return grille_vider
+
+        ligne, colonne = positions.pop()
+        valeur_originale = grille_vider[ligne][colonne]
+        grille_vider[ligne][colonne] = 0
+
+        if compte_solution_V3(grille_vider, nombre_de_valeur) == 1:
+            nombre_case_supprime += 1
         else:
-            grille_test[ligne][colonne] = valeur_1 # on remet case 1, garde case 2 vide
-            
-            if compte_solutions(grille_test,nombre_de_valeur) == 1: # on retest l'unicité de la solution
-                grille_vider = grille_test 
-                nombre_case_supprimer += 1
-                positions.remove(position_tente)
-            
-            else:
-                grille_test[ligne][colonne] = 0 # on vide case 1
-                grille_test[symetrique_ligne][symetrique_colonne] = valeur_2 # on remet case 2
-                
-                if compte_solutions(grille_test, nombre_de_valeur) == 1: # on retest l'unicité de la solution
-                    grille_vider = grille_test
-                    nombre_case_supprimer += 1
-                    positions.remove(position_tente)
-                
-                else:
-                    positions.remove(position_tente)
-        
-            if len(positions) == 0: # Verifie la présence de nouvelle solution possible
-            
-                if (nombre_valeur_a_supprimer - nombre_case_supprimer) > 1: # verifie si on a le bon nombre de valeur
-                    grille_vider = copy.deepcopy(grille_remplie(nombre_de_valeur)) # si l'écart est trop grand, il recomence avec une autre grille
-                return suppression_valeur(grille_vider, nombre_valeur_a_supprimer, nombre_de_valeur) 
-            
-            else:
-                break # sinon il s'arrete la et renvoie la grille comme elle est
-    
+            grille_vider[ligne][colonne] = valeur_originale
+
     return grille_vider
+
+grille = grille_remplie(9)
+
+print (suppression_valeur(grille, 64, 9))
