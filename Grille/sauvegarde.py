@@ -1,6 +1,7 @@
 import json 
 
 fichier_sauvergarde = "Sauvegardes/grilles_jouees.json"
+fichier_sauvergarde_tempo = "Sauvegardes/grilles_en_cours.json"
 
 def sauvegarde (grille, temps, difficulte, score):
     
@@ -29,3 +30,49 @@ def sauvegarde (grille, temps, difficulte, score):
     ecriture.close()
 
     return 
+
+def sauvegarde_progression(grille_actuelle,temps):
+    
+    donnee = {
+        "grille_actuelle" : grille_actuelle,
+        "temps" : temps,
+        "etat" : "en_cours"
+    }
+    
+    ecriture = open(fichier_sauvergarde_tempo,"w")
+    json.dump(donnee,ecriture)
+    ecriture.close()
+    
+    return
+
+def reinitialisation():
+    
+    donnee = {
+        "grille_actuelle" : None,
+        "temps" : None,
+        "etat" : "vide"
+    }
+
+    ecriture = open(fichier_sauvergarde_tempo,"w")
+    json.dump(donnee,ecriture)
+    ecriture.close()
+
+    return
+
+def charger_sauvegarde():
+
+    lecture=open(fichier_sauvergarde_tempo, "r")
+    donnee = json.load(lecture)
+    lecture.close()
+
+    if donnee["etat"] == "vide" : 
+        return None
+    return donnee["grille_actuelle"]
+
+
+
+
+    
+
+
+
