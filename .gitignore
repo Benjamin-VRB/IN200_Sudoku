@@ -1,3 +1,5 @@
+venv/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -5,6 +7,7 @@ __pycache__/
 
 # C extensions
 *.so
+*.pyc
 
 # Distribution / packaging
 .Python
@@ -54,6 +57,7 @@ cover/
 # Translations
 *.mo
 *.pot
+*.csv
 
 # Django stuff:
 *.log
