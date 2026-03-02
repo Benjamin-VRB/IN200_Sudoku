@@ -31,10 +31,11 @@ def sauvegarde (grille, temps, difficulte, score):
 
     return 
 
-def sauvegarde_progression(grille_actuelle,temps):
+def sauvegarde_progression(grille_actuelle,grille_solution,temps):
     
     donnee = {
         "grille_actuelle" : grille_actuelle,
+        "grille_solution" : grille_solution,
         "temps" : temps,
         "etat" : "en_cours"
     }
@@ -49,6 +50,7 @@ def reinitialisation():
     
     donnee = {
         "grille_actuelle" : None,
+        "grille_solution" : None,
         "temps" : None,
         "etat" : "vide"
     }
@@ -67,12 +69,4 @@ def charger_sauvegarde():
 
     if donnee["etat"] == "vide" : 
         return None
-    return donnee["grille_actuelle"]
-
-
-
-
-    
-
-
-
+    return donnee
