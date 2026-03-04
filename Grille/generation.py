@@ -3,7 +3,9 @@ import copy
 import math
 from verification import compter_solution_V3
 from verification import compter_solution_kakuro
-from verification import valider_masque
+from verification import valider_masque_kakuro
+from verification import trouver_groupes_horizontaux_kakuro
+from verification import trouver_groupes_verticaux_kakuro
 
 dictionnaire_liste_ligne = {}
 dictionnaire_liste_colonne = {}
@@ -49,7 +51,6 @@ def initialiser_dictionnaires_variantes(dimension):
 
 def remplir_grille_variante(dimension):
     
-    racine = int(math.sqrt(dimension))
     grille = generateur_grille_vide(dimension)
     initialiser_dictionnaires(dimension)
     essais = [[[] for _ in range(dimension)] for _ in range(dimension)]  # valeurs déjà essayées par les cases
@@ -92,6 +93,24 @@ def remplir_grille_variante(dimension):
     
     return (grille)
 
+def generer_masque_kakuro(dimension, max_groupe=9):
+    """Génère un masque de Kakuro valide (0 = case blanche, 1 = case noire)."""
+    grille = [[1 for _ in range(dimension)] for _ in range(dimension)]
+    
+    for ligne in range(dimension):
+        colonne = 0
+        while colonne < dimension:
+            restant = dimension - colonne
+            if restant < 2:
+                break
+            taille = random.randint(2, min(max_groupe, restant))
+            for i in range(taille):
+                grille[ligne][colonne + i] = 0
+            colonne += taille
+            if colonne < dimension:
+                grille[ligne][colonne] = 1
+                colonne += 1
+    return grille
 
 def remplir_grille(dimension):
     
@@ -166,121 +185,203 @@ def supprimer_valeur(grille_complete, nombre_valeur_a_supprimer, dimension):
 
     return grille_vider
 
-def generer_masque(dimension, taux_noir=0.3, max_groupe=9):
+def calculer_sommes(solution, groupes):
+    return [sum(solution[i][j] for (i,j) in g) for g in groupes]
 
-    while True:
-
-        grille = [[0 for _ in range(dimension)] for _ in range(dimension)]
-
-        for ligne in range(dimension):
-            for colonne in range(dimension):
-                if random.random() < taux_noir:
-                    grille[ligne][colonne] = 1
-
-        if valider_masque(grille, dimension, max_groupe):
-            return grille
-
-def trouver_groupes_horizontaux(grille, dimension):
-    groupes = []
-
-    for ligne in range(dimension):
-        colonne = 0
-        while colonne < dimension:
-
-            if grille[ligne][colonne] == 1:
-                colonne += 1
-                continue
-
-            debut = colonne
-
-            while colonne < dimension and grille[ligne][colonne] == 0:
-                colonne += 1
-
-            if colonne - debut >= 2:
-                groupes.append([(ligne, c) for c in range(debut, colonne)])
-
-    return groupes
+def remplir_grille_kakuro(grille):
+    dimension = len(grille)
+    groupes_h = trouver_groupes_horizontaux_kakuro(grille)
+    groupes_v = trouver_groupes_verticaux_kakuro(grille)
     
+    dict_h = {i: list(range(1,10)) for i in range(len(groupes_h))}
+    dict_v = {i: list(range(1,10)) for i in range(len(groupes_v))}
     
-def trouver_groupes_verticaux(grille, dimension):
-    groupes = []
+    case_vers_groupes = {}
+    for idx, g in enumerate(groupes_h):
+        for (i,j) in g:
+            case_vers_groupes[(i,j)] = case_vers_groupes.get((i,j), [None,None])
+            case_vers_groupes[(i,j)][0] = idx
+    for idx, g in enumerate(groupes_v):
+        for (i,j) in g:
+            case_vers_groupes[(i,j)] = case_vers_groupes.get((i,j), [None,None])
+            case_vers_groupes[(i,j)][1] = idx
+    
+    solution = [[None]*dimension for _ in range(dimension)]
+    cases = [(i,j) for i in range(dimension) for j in range(dimension) if grille[i][j] == 0]
+    
+    def backtrack(index):
+        if index == len(cases):
+            return True
+        i,j = cases[index]
+        g_h, g_v = case_vers_groupes[(i,j)]
+        
+        candidats = list(set(dict_h[g_h]) & set(dict_v[g_v]))
+        random.shuffle(candidats)
+        
+        for val in candidats:
+            solution[i][j] = val
+            dict_h[g_h].remove(val)
+            dict_v[g_v].remove(val)
+            if backtrack(index+1):
+                return True
+            solution[i][j] = None
+            dict_h[g_h].append(val)
+            dict_v[g_v].append(val)
+        return False
+    
+    if backtrack(0):
+        return solution
+    else:
+        return None
 
-    for colonne in range(dimension):
-        ligne = 0
-
-        while ligne < dimension:
-
-            # Si case noire → on avance
-            if grille[ligne][colonne] == 1:
-                ligne += 1
-                continue
-
-            debut = ligne
-
-            # Avancer tant que case blanche
-            while ligne < dimension and grille[ligne][colonne] == 0:
-                ligne += 1
-
-            # Vérifier taille ≥ 2
-            if ligne - debut >= 2:
-                groupes.append([(l, colonne) for l in range(debut, ligne)])
-
-    return groupes
-
-def generer_kakuro(grille, dimension):
-
+def generer_kakuro(dimension):
     while True:
-
-        # Génération masque valide
-        grille_masque = generer_masque(dimension)
-
-        if not valider_masque(grille_masque, dimension):
+        masque = generer_masque_kakuro(dimension)
+        if not valider_masque_kakuro(masque):
             continue
-
-        # Trouver groupes
-        groupes_horizontaux = trouver_groupes_horizontaux(grille_masque, dimension)
-        groupes_verticaux = trouver_groupes_verticaux(grille_masque, dimension)
-
-        # Sécurité minimale
-        if not groupes_horizontaux or not groupes_verticaux:
+        
+        solution = remplir_grille_kakuro(masque)
+        if solution is None:
             continue
+        
+        groupes_h = trouver_groupes_horizontaux_kakuro(masque)
+        groupes_v = trouver_groupes_verticaux_kakuro(masque)
+        sommes_h = calculer_sommes(solution, groupes_h)
+        sommes_v = calculer_sommes(solution, groupes_v)
+        
+        nb = compter_solution_kakuro(
+            copy.deepcopy(masque),
+            dimension,
+            groupes_h,
+            sommes_h,
+            groupes_v,
+            sommes_v,
+            limite=2
+        )
+        if nb == 1:
+            break  # succès
+        
+    return {
+        "masque": masque,
+        "solution": solution,
+        "groupes_horizontaux": groupes_h,
+        "groupes_verticaux": groupes_v,
+        "sommes_horizontales": sommes_h,
+        "sommes_verticales": sommes_v
+    }
 
-        # Calcul des sommes à partir de la solution complète
-        somme_horizontale = [sum(grille[l][c] for (l, c) in groupe) for groupe in groupes_horizontaux]   
+def is_valid_group(group):
+    """Vérifie qu'il n'y a pas de doublon et que la somme est cohérente"""
+    return len(set(group)) == len(group) and all(1 <= n <= 9 for n in group)
 
-        somme_verticale = [sum(grille[l][c] for (l, c) in groupe) for groupe in groupes_verticaux]  
+def solve_kakuro(grid, horizontal_groups, vertical_groups):
+    """Solveur par backtracking pour garantir unicité."""
+    rows, cols = len(grid), len(grid[0])
+    solutions = []
 
-        # Construction du puzzle vide
-        puzzle = [[None for _ in range(dimension)] for _ in range(dimension)]
+    def backtrack(r, c):
+        if r == rows:
+            solutions.append([row[:] for row in grid])
+            return len(solutions) <= 1  # Stop si plus d'une solution
+        if c == cols:
+            return backtrack(r + 1, 0)
+        if grid[r][c] != 0:
+            return backtrack(r, c + 1)
 
-        # Placer cases noires
-        for l in range(dimension):
-            for c in range(dimension):
-                if grille_masque[l][c] == 1:
-                    puzzle[l][c] = {"type": "noire", "H": None, "V": None}
+        # Identifier groupes horizontaux et verticaux
+        for val in range(1, 10):
+            grid[r][c] = val
+            if all_valid(grid, horizontal_groups, vertical_groups):
+                if not backtrack(r, c + 1):
+                    grid[r][c] = 0
+                    return False
+            grid[r][c] = 0
+        return True
+
+    def all_valid(grid, h_groups, v_groups):
+        for (r, c, length) in h_groups:
+            vals = [grid[r][c+i] for i in range(length)]
+            if 0 not in vals and len(set(vals)) != len(vals):
+                return False
+        for (r, c, length) in v_groups:
+            vals = [grid[r+i][c] for i in range(length)]
+            if 0 not in vals and len(set(vals)) != len(vals):
+                return False
+        return True
+
+    backtrack(0, 0)
+    return solutions
+
+def generate_kakuro(rows, cols):
+    """Génère une grille de Kakuro avec une seule solution"""
+    grid = [[0 for _ in range(cols)] for _ in range(rows)]
+
+    # Définir les groupes horizontaux et verticaux (au moins 2 cases)
+    horizontal_groups = []
+    vertical_groups = []
+
+    # Pour simplifier, créer des groupes de longueur aléatoire >=2
+    for r in range(rows):
+        c = 0
+        while c < cols - 1:
+            length = random.randint(2, min(4, cols - c))
+            horizontal_groups.append((r, c, length))
+            c += length
+            if c < cols:
+                grid[r][c] = -1  # Case noire séparatrice
+                c += 1
+
+    for c in range(cols):
+        r = 0
+        while r < rows - 1:
+            length = random.randint(2, min(4, rows - r))
+            vertical_groups.append((r, c, length))
+            r += length
+            if r < rows:
+                grid[r][c] = -1  # Case noire séparatrice
+                r += 1
+
+    # Résoudre la grille pour obtenir une seule solution
+    solutions = solve_kakuro(grid, horizontal_groups, vertical_groups)
+    if not solutions:
+        return generate_kakuro(rows, cols)  # Recommencer si pas de solution unique
+    solution = solutions[0]
+
+    # Calculer les indices (sums)
+    horizontal_sums = {}
+    vertical_sums = {}
+
+    for r, c, length in horizontal_groups:
+        horizontal_sums[(r, c-1)] = sum(solution[r][c + i] for i in range(length))
+    for r, c, length in vertical_groups:
+        vertical_sums[(r-1, c)] = sum(solution[r + i][c] for i in range(length))
+
+    return solution, horizontal_sums, vertical_sums
+
+def print_kakuro(grid, horizontal_sums, vertical_sums):
+    rows, cols = len(grid), len(grid[0])
+    for r in range(rows):
+        line = ""
+        for c in range(cols):
+            if grid[r][c] == -1:
+                line += "█\t"
+            else:
+                h_sum = horizontal_sums.get((r, c-1), "")
+                v_sum = vertical_sums.get((r-1, c), "")
+                if h_sum or v_sum:
+                    line += f"{v_sum}\\{h_sum}\t"
                 else:
-                    puzzle[l][c] = {"type": "blanche", "valeur": 0}
+                    line += ".\t"
+        print(line)
+    print()
 
-        # Placer les sommes horizontales
-        for i, groupe in enumerate(groupes_horizontaux):
-            l, c = groupe[0]
-            if c > 0 and puzzle[l][c-1]["type"] == "noire":
-                puzzle[l][c-1]["H"] = somme_horizontale[i]
+# --- Exemple d'utilisation ---
+rows, cols = 5, 5
+solution, h_sums, v_sums = generate_kakuro(rows, cols)
 
-        # Placer les sommes verticales
-        for i, groupe in enumerate(groupes_verticaux):
-            l, c = groupe[0]
-            if l > 0 and puzzle[l-1][c]["type"] == "noire":
-                puzzle[l-1][c]["V"] = somme_verticale[i]
+print("Solution complète:")
+for row in solution:
+    print(row)
 
-        # Vérifier unicité
-        nb_solutions = compter_solution_kakuro(puzzle, dimension, groupes_verticaux, groupes_horizontaux, limite=2)
-            
-        if nb_solutions == 1:
-            return puzzle
-
-print(remplir_grille_variante(9),)
-    
-    
-
-
+print("\nKakuro avec indices:")
+print_kakuro(solution, h_sums, v_sums)
