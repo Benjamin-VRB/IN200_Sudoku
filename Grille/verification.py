@@ -1,6 +1,5 @@
 import math
-from generation import trouver_groupes_horizontaux
-from generation import trouver_groupes_verticaux
+import copy
 
 def compter_solution_V3(grille, dimension, limite = 2):
     
@@ -191,7 +190,7 @@ def compter_solution_V1(grille, dimension, limite=2):
     resoudre()
     return compteur[0]
 
-def compter_taille_groupe_horizontal(grille, ligne, colonne, dimension):
+def compter_taille_groupe_horizontal_kakuro(grille, ligne, colonne, dimension):
     # Compter à gauche
     taille = 0
     c = colonne - 1
@@ -211,7 +210,7 @@ def compter_taille_groupe_horizontal(grille, ligne, colonne, dimension):
 
     return True
 
-def compter_taille_groupe_horizontal(grille, ligne, colonne, dimension):
+def compter_taille_groupe_vertical_kakuro(grille, ligne, colonne, dimension):
     taille = 0
     l = ligne - 1
     while l >= 0 and grille[l][colonne] == 0:
@@ -232,162 +231,143 @@ def compter_solution_kakuro(grille, dimension,
                             groupes_horizontaux, sommes_horizontales,
                             groupes_verticaux, sommes_verticales,
                             limite=2):
-
-    max_val = dimension if dimension > 9 else 9
-
-    # Disponibilité des valeurs par groupe
+    max_val = 9
     dispo_h = [[True]*max_val for _ in range(len(groupes_horizontaux))]
     dispo_v = [[True]*max_val for _ in range(len(groupes_verticaux))]
-
-    # Sommes partielles par groupe
-    somme_actuelle_h = [0]*len(groupes_horizontaux)
-    somme_actuelle_v = [0]*len(groupes_verticaux)
-
-    # Mapping case -> groupe horizontal / vertical
-    case_to_group = {}
-
-    for i, groupe in enumerate(groupes_horizontaux):
-        for (l,c) in groupe:
-            case_to_group[(l,c)] = [i, None]
-
-    for i, groupe in enumerate(groupes_verticaux):
-        for (l,c) in groupe:
-            case_to_group[(l,c)][1] = i
-
-    # Liste des cases vides
+    grille_test = copy.deepcopy(grille)
+    somme_h = [0]*len(groupes_horizontaux)
+    somme_v = [0]*len(groupes_verticaux)
+    
+    case_vers_groupes = {}
+    for idx, g in enumerate(groupes_horizontaux):
+        for (i,j) in g:
+            case_vers_groupes[(i,j)] = [idx, None]
+    for idx, g in enumerate(groupes_verticaux):
+        for (i,j) in g:
+            case_vers_groupes[(i,j)][1] = idx
+    
     cases_vides = []
-    for l in range(dimension):
-        for c in range(dimension):
-            if grille[l][c] == 0:
-                cases_vides.append((l,c))
+    for i in range(dimension):
+        for j in range(dimension):
+            if grille_test[i][j] == 0:
+                cases_vides.append((i,j))
             else:
-                val = grille[l][c]
-                h, v = case_to_group[(l,c)]
-
+                if (i,j) not in case_vers_groupes:
+                    continue
+                h, v = case_vers_groupes[(i,j)]
+                val = grille_test[i][j]
                 dispo_h[h][val-1] = False
                 dispo_v[v][val-1] = False
-                somme_actuelle_h[h] += val
-                somme_actuelle_v[v] += val
-
+                somme_h[h] += val
+                somme_v[v] += val
+    
     compteur = 0
-
     def solveur():
         nonlocal compteur
-
         if compteur >= limite:
             return
-
         if not cases_vides:
             compteur += 1
             return
-
-        # MRV : choisir la case avec le moins de candidats
-        meilleur_idx = -1
-        meilleurs_valeurs = []
-        min_possibilites = max_val + 1
-
-        for idx, (l,c) in enumerate(cases_vides):
-            h, v = case_to_group[(l,c)]
+        # MRV
+        best_idx = -1
+        best_vals = []
+        min_poss = max_val+1
+        for idx, (i,j) in enumerate(cases_vides):
+            h,v = case_vers_groupes[(i,j)]
             candidats = []
-
             for val in range(1, max_val+1):
-                if not dispo_h[h][val-1]:
+                if not dispo_h[h][val-1] or not dispo_v[v][val-1]:
                     continue
-                if not dispo_v[v][val-1]:
+                if somme_h[h]+val > sommes_horizontales[h] or somme_v[v]+val > sommes_verticales[v]:
                     continue
-
-                # Vérification somme horizontale
-                if somme_actuelle_h[h] + val > sommes_horizontales[h]:
-                    continue
-
-                # Vérification somme verticale
-                if somme_actuelle_v[v] + val > sommes_verticales[v]:
-                    continue
-
                 candidats.append(val)
-
-            if len(candidats) < min_possibilites:
-                min_possibilites = len(candidats)
-                meilleurs_valeurs = candidats
-                meilleur_idx = idx
-
-            if min_possibilites == 1:
+            if len(candidats) < min_poss:
+                min_poss = len(candidats)
+                best_vals = candidats
+                best_idx = idx
+            if min_poss == 1:
                 break
-
-        if min_possibilites == 0:
+        if min_poss == 0:
             return
-
-        l, c = cases_vides.pop(meilleur_idx)
-        h, v = case_to_group[(l,c)]
-
-        for val in meilleurs_valeurs:
-
-            # Placement
+        i,j = cases_vides.pop(best_idx)
+        h,v = case_vers_groupes[(i,j)]
+        for val in best_vals:
             dispo_h[h][val-1] = False
             dispo_v[v][val-1] = False
-            somme_actuelle_h[h] += val
-            somme_actuelle_v[v] += val
-            grille[l][c] = val
-
-            # Vérification fin de groupe
-            complet_h = all(grille[x][y] != 0 for (x,y) in groupes_horizontaux[h])
-            complet_v = all(grille[x][y] != 0 for (x,y) in groupes_verticaux[v])
-
+            somme_h[h] += val
+            somme_v[v] += val
+            grille_test[i][j] = val
+            complet_h = all(grille_test[x][y] != 0 for x,y in groupes_horizontaux[h])
+            complet_v = all(grille_test[x][y] != 0 for x,y in groupes_verticaux[v])
             valide = True
-            if complet_h and somme_actuelle_h[h] != sommes_horizontales[h]:
+            if complet_h and somme_h[h] != sommes_horizontales[h]:
                 valide = False
-            if complet_v and somme_actuelle_v[v] != sommes_verticales[v]:
+            if complet_v and somme_v[v] != sommes_verticales[v]:
                 valide = False
-
             if valide:
                 solveur()
-
-            # Backtrack
             dispo_h[h][val-1] = True
             dispo_v[v][val-1] = True
-            somme_actuelle_h[h] -= val
-            somme_actuelle_v[v] -= val
-            grille[l][c] = 0
-
+            somme_h[h] -= val
+            somme_v[v] -= val
+            grille_test[i][j] = 0
             if compteur >= limite:
                 break
-
-        cases_vides.insert(meilleur_idx, (l,c))
-
+        cases_vides.insert(best_idx, (i,j))
+    
     solveur()
     return compteur
 
-def valider_masque(grille, dimension,):
+def trouver_groupes_horizontaux_kakuro(grille):
+    groupes = []
+    dimension = len(grille)
+    for ligne in range(dimension):
+        groupe = []
+        for colonne in range(dimension):
+            if grille[ligne][colonne] == 0:
+                groupe.append((ligne, colonne))
+            else:
+                if len(groupe) >= 2:
+                    groupes.append(groupe)
+                groupe = []
+        if len(groupe) >= 2:
+            groupes.append(groupe)
+    return groupes
 
-    max_groupe = dimension
+def trouver_groupes_verticaux_kakuro(grille):
+    groupes = []
+    dimension = len(grille)
+    for colonne in range(dimension):
+        groupe = []
+        for ligne in range(dimension):
+            if grille[ligne][colonne] == 0:
+                groupe.append((ligne, colonne))
+            else:
+                if len(groupe) >= 2:
+                    groupes.append(groupe)
+                groupe = []
+        if len(groupe) >= 2:
+            groupes.append(groupe)
+    return groupes
 
-    groupes_h = trouver_groupes_horizontaux(grille, dimension)
-    groupes_v = trouver_groupes_verticaux(grille, dimension)
-
+def valider_masque_kakuro(grille):
+    dimension = len(grille)
+    groupes_h = trouver_groupes_horizontaux_kakuro(grille)
+    groupes_v = trouver_groupes_verticaux_kakuro(grille)
+    
     # Vérifier tailles des groupes
-    for g in groupes_h:
-        if len(g) < 2 or len(g) > max_groupe:
+    for g in groupes_h + groupes_v:
+        if len(g) < 2 or len(g) > 9:
             return False
-
-    for g in groupes_v:
-        if len(g) < 2 or len(g) > max_groupe:
-            return False
-
+    
     # Vérifier que chaque case blanche appartient à 2 groupes
     compteur = [[0]*dimension for _ in range(dimension)]
-
-    for g in groupes_h:
-        for (l, c) in g:
-            compteur[l][c] += 1
-
-    for g in groupes_v:
-        for (l, c) in g:
-            compteur[l][c] += 1
-
-    for l in range(dimension):
-        for c in range(dimension):
-            if grille[l][c] == 0:  # case blanche
-                if compteur[l][c] != 2:
-                    return False
-
+    for g in groupes_h + groupes_v:
+        for (i,j) in g:
+            compteur[i][j] += 1
+    for i in range(dimension):
+        for j in range(dimension):
+            if grille[i][j] == 0 and compteur[i][j] != 2:
+                return False
     return True
