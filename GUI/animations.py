@@ -66,7 +66,7 @@ def mouvement_exterieur_fond_menu(canvas: tk.Canvas, instantane: bool = True, it
         canvas.after(temps_attente, mouvement_exterieur_fond_menu, *[canvas, False, iteration + 1])
 
 
-def survole(canvas: tk.Canvas, fond: list, bordure: list, 
+def survole(canvas: tk.Canvas, fond: list[int], bordure: list[int], 
                    couleur_fond: str, couleur_bordure: str) -> None:
     """
     Change les couleurs du widgets lorqu'il est survolé par la souris
@@ -77,7 +77,7 @@ def survole(canvas: tk.Canvas, fond: list, bordure: list,
         canvas.itemconfig(tagOrId=id, fill=couleur_bordure, outline=couleur_fond)
 
 
-def non_survole(canvas: tk.Canvas, fond: list, bordure: list, 
+def non_survole(canvas: tk.Canvas, fond: list[int], bordure: list[int], 
                        couleur_fond: str, couleur_bordure: str) -> None:
     """
     Change les couleurs du widgets lorqu'il n'est plus survolé par la souris
@@ -88,7 +88,7 @@ def non_survole(canvas: tk.Canvas, fond: list, bordure: list,
         canvas.itemconfig(tagOrId=id, fill=couleur_bordure, outline=couleur_fond)
 
 
-def survole_non_survole(canvas: tk.Canvas, tag: str, fond: list, bordure: list, 
+def survole_non_survole(canvas: tk.Canvas, tag: str, fond: list[int], bordure: list[int], 
                         couleur_fond: str, couleur_bordure: str, 
                         couleur_fond_surv: str, couleur_bordure_surv: str) -> None:
     """
