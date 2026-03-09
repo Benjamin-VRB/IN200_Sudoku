@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from GUI.fenetre import racine, LARGEUR_PIXEL_FENETRE, HAUTEUR_PIXEL_FENETRE
-#from GUI.sudoku import aller_sudoku
+from GUI.sudoku import aller_sudoku
 from GUI.stats import aller_stats
 from GUI.credits import aller_credits
 from GUI.widgets import creer_boutton, survole_non_survole
@@ -144,8 +144,8 @@ def aller_menu() -> tk.Canvas:
     survole_non_survole(cnv, tag=TAG_QUITTER, fond=fond_quitter, bordure=bordure_quitter, 
                         **(COULEURS_BOUTON | COULEURS_SURVOLE))
 
-    #cnv.tag_bind(tagOrId=TAG_PERSO, sequence="<Button-1>", 
-    #             func=lambda event: aller_sudoku(cnv))
+    cnv.tag_bind(tagOrId=TAG_PERSO, sequence="<Button-1>", 
+                 func=lambda event: aller_sudoku(cnv))
     cnv.tag_bind(tagOrId=TAG_STATS, sequence="<Button-1>", 
                  func=lambda event: aller_stats(cnv))
     cnv.tag_bind(tagOrId=TAG_CREDITS, sequence="<Button-1>", func=lambda event: aller_credits(cnv))

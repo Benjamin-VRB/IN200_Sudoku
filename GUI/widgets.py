@@ -106,47 +106,51 @@ def activer_widget(canvas: tk.Canvas, tags_or_ids: list[str]) -> None:
         canvas.itemconfig(tag_or_id, state=tk.NORMAL)
 
 
-def modifier_valeur_case(event, canvas: tk.Canvas, texte: int, valeur_max: int) -> None:
+def reset_focus_cases(canvas: tk.Canvas, *cases: tuple[int]) -> None:
+
+    canvas.unbind_all(sequence="<KeyPress>")
+    for case in cases:
+        canvas.itemconfig(tagOrId=case[0], width=1)
+        canvas.tag_lower(case[0])
+
+def modifier_valeur_case(event, canvas: tk.Canvas, case: tuple[int], 
+                         valeur_max: int) -> None:
+    
+    texte: int = case[1]
     nombre_actuel: str = canvas.itemcget(tagOrId=texte, option="text")
     if event.char in "123456789" and int(nombre_actuel + event.char) <= valeur_max:
         canvas.itemconfig(tagOrId=texte, text=nombre_actuel + event.char)
-    elif event.char =="0" and int(nombre_actuel + event.char) <= valeur_max \
+    elif event.char == "0" and int(nombre_actuel + event.char) <= valeur_max \
         and nombre_actuel != "":
         canvas.itemconfig(tagOrId=texte, text=nombre_actuel + event.char)
     elif event.keysym == "BackSpace":
         canvas.itemconfig(tagOrId=texte, text=nombre_actuel[:-1])
+    elif event.keysym == "Return":
+        reset_focus_cases(canvas, case)
 
 
-def reset_focus_case(canvas: tk.Canvas, cases: list[int], carres: list[int]) -> None:
-    for case in cases:
-        canvas.itemconfig(tagOrId=case, width=2)
-    for carre in carres:
-        canvas.tag_raise(carre)
-
-
-def entree_focus_case(canvas: tk.Canvas, case: int, texte: int, valeur_max: int) -> None:
-    canvas.tag_raise(case)
+def entree_focus_case(canvas: tk.Canvas, case: tuple[int], valeur_max: int, 
+                      cases_grille: list[int]) -> None:
+    
+    case_vide: int = case[0]
+    texte: int = case[1]
+    reset_focus_cases(canvas, *cases_grille)
+    canvas.tag_raise(case_vide)
     canvas.tag_raise(texte)
-    canvas.itemconfig(tagOrId=case, width=8)
+    canvas.itemconfig(tagOrId=case_vide, width=4)
     canvas.bind_all(sequence="<KeyPress>", func=lambda event: 
-                modifier_valeur_case(event, canvas=canvas, texte=texte, valeur_max=valeur_max))
+                modifier_valeur_case(event, canvas=canvas, case=case,
+                                     valeur_max=valeur_max))
 
 
-def creer_case_vide(canvas: tk.Canvas, tag: str, coord: tuple[int], 
-                    longueur_cote: int, valeur_max: int) -> tuple[int]:
+def creer_case(canvas: tk.Canvas, tag: str, coord: tuple[int], 
+                    longueur_cote: int) -> tuple[int]:
 
     case_vide: int = canvas.create_rectangle(coord, (coord[0] + longueur_cote, coord[1] + longueur_cote),
-                                             fill="#ffffff", outline="#000000", width=2, tags=tag)
+                                             fill="#ffffff", outline="#000000", width=1, tags=tag)
     texte: int = canvas.create_text((coord[0] + longueur_cote // 2, coord[1] + longueur_cote // 2),
                                    anchor=tk.CENTER, font=("Century", int(1 / 3  * longueur_cote)), 
                                    fill="#000000", tags=tag, text="")
-    sequence: str = "<Button-1>"
-    func = entree_focus_case
-    canvas.tag_bind(case_vide, sequence=sequence, func=lambda event: 
-                func(canvas=canvas, case=case_vide, texte=texte, valeur_max=valeur_max))
-    canvas.tag_bind(texte, sequence=sequence, func=lambda event: 
-                func(canvas=canvas, case=case_vide, texte=texte, valeur_max=valeur_max))
-
     return (case_vide, texte)
 
 
@@ -159,9 +163,9 @@ def creer_grille_sudoku(canvas: tk.Canvas, tag: str, coord: tuple[int], nb_case_
             x_case: int = coord[0] + colonne * longueur_cote_case
             y_case: int = coord[1] + rangee * longueur_cote_case
             cases.append(
-                creer_case_vide(canvas, tag=tag, coord=(x_case, y_case), 
-                                longueur_cote=longueur_cote_case, valeur_max=nb_case_cote)
-                )
+                creer_case(canvas, tag=tag, coord=(x_case, y_case), 
+                                longueur_cote=longueur_cote_case)
+                )  
     
     carres: list[int] = []
     if nb_case_cote % nb_carre_cote == 0:
@@ -173,6 +177,19 @@ def creer_grille_sudoku(canvas: tk.Canvas, tag: str, coord: tuple[int], nb_case_
                 carres.append(
                     canvas.create_rectangle((x_carre_1, y_carre_2), 
                                             (x_carre_1 + longueur_cote_carre, y_carre_2 + longueur_cote_carre),
-                                            fill="", width=4, tags=tag)
+                                            fill="", width=3, tags=tag)
                     )
+                
+    sequence: str = "<Button-1>"
+    func = entree_focus_case
+    for case in cases:
+        case_vide: int = case[0]
+        texte: int = case[1]
+        canvas.tag_bind(tagOrId=case_vide, sequence=sequence, func=lambda event, case=case: 
+                        func(canvas=canvas, case=case, valeur_max=nb_case_cote, 
+                             cases_grille=cases))
+        canvas.tag_bind(tagOrId=texte, sequence=sequence, func=lambda event, case=case: 
+                        func(canvas=canvas, case=case, valeur_max=nb_case_cote, 
+                             cases_grille=cases))
+                    
     return (cases, carres)
