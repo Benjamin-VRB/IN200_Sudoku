@@ -3,7 +3,7 @@
 Groupe de TD: LDDMP
 
 Groupe de projet:
-- Joseph HOUEL 22503116
-- Adam CONTAT 22505474
-- Louis THALGOTT-KAISER 22502836, responsable de la qualité du code
-- Benjamin VRBANAC 22501074, responsable GitHub
+- Joseph HOUEL
+- Adam CONTAT
+- Louis THALGOTT-KAISER, responsable de la qualité du code
+- Benjamin VRBANAC, responsable GitHub
