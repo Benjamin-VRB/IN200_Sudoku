@@ -1,5 +1,5 @@
 import random
-import math
+import vérification_Kenken
 
 dictionnaire_liste_ligne = {}
 dictionnaire_liste_colonne = {}
@@ -99,6 +99,7 @@ def generer_cages_remplies(grille, taille_min=2, taille_max=10):
 
 
 def générer_grille_KenKen(taille, max_case):
+    global cages_finales
     while True:
         grille = remplir_grille(taille)  
         if grille is None:
@@ -111,10 +112,10 @@ def générer_grille_KenKen(taille, max_case):
 
     cages_finales = {}
     for position in cages:   # On choisit aléatoirement une opération qu'on éxécute dans une cage et on rend un dictionnaire qui nous donne toutes les informations d'une cage.
-        if len(position) == 2 and (grille[0][0] % grille[0][1] == 0 or grille[1][0] % grille[1][1] == 0):
-            opération = random.choice(["+", "*", "-", "/"])
-        elif len(position) == 2:
-            opération = random.choice(["+", "*", "-"])
+        if len(position) == 2 and (grille[position[0][0]][position[0][1]] % grille[position[1][0]][position[1][1]] == 0 or grille[1][0] % grille[1][1] == 0):
+            opération = random.choice(["+", "*", "-", "/", "/", "/", "/", "/"])
+        elif len(position) == 2 and abs(grille[position[0][0]][position[0][1]] - grille[position[1][0]][position[1][1]]) != 0:
+            opération = random.choice(["+", "*", "-", "-", "-"])
         else:
             opération =random.choice(["+", "*"])
 
@@ -142,19 +143,17 @@ def générer_grille_KenKen(taille, max_case):
         if opération == "/":
             a = grille[position[0][0]][position[0][1]]
             b = grille[position[1][0]][position[1][1]]
-            compteur = max(a,b) // min(a,b)  
+            compteur = max(a,b) / min(a,b)  
             cages_finales["cage" + str(cages.index(position) + 1)] = {"opération": "/", "résultat": compteur, "cases": position}
+    
+    global grille_générée
+    grille_générée = grille
+    
+    return grille, cages_finales
 
-    print("Grille générée :")
-    for ligne in grille:
-        print(ligne)
+a = générer_grille_KenKen(5, 4)
 
-    print("\nCages générées :")
-    for cle, sous_dico in cages_finales.items():
-        print(cle)
-        print(sous_dico)
-        print() 
+while vérification_Kenken.verifier_unicite_kenken(5, cages_finales, limite=2) != 1:
+    a = générer_grille_KenKen(5, 4)
 
-
-
-générer_grille_KenKen(5, 4)
+print(a)
