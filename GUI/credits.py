@@ -47,7 +47,7 @@ def aller_credits(canvas: tk.Canvas) -> None:
 
     canvas.create_text((X_TEXT, 250), text="Adam CONTAT", font=(POLICE, TAILLE_TEXT), 
                        **PARAMS_TEXT)
-    canvas.create_text((X_TEXT, 300), text="Joseph HOUEL", font=(POLICE, TAILLE_TEXT), 
+    canvas.create_text((X_TEXT, 300), text="Joseph HOUËL", font=(POLICE, TAILLE_TEXT), 
                        **PARAMS_TEXT)
     canvas.create_text((X_TEXT, 350), text="Louis THALGOTT-KAISER", font=(POLICE, TAILLE_TEXT), 
                        **PARAMS_TEXT)
