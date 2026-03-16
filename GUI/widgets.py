@@ -110,7 +110,7 @@ def reset_focus_cases(canvas: tk.Canvas, *cases: tuple[int]) -> None:
 
     canvas.unbind_all(sequence="<KeyPress>")
     for case in cases:
-        canvas.itemconfig(tagOrId=case[0], width=1)
+        canvas.itemconfig(tagOrId=case[0], width=1, outline="#000000")
         canvas.tag_lower(case[0])
 
 def modifier_valeur_case(event, canvas: tk.Canvas, case: tuple[int], 
@@ -123,7 +123,7 @@ def modifier_valeur_case(event, canvas: tk.Canvas, case: tuple[int],
     elif event.char == "0" and int(nombre_actuel + event.char) <= valeur_max \
         and nombre_actuel != "":
         canvas.itemconfig(tagOrId=texte, text=nombre_actuel + event.char)
-    elif event.keysym == "BackSpace":
+    elif event.keysym == "BackSpace" or event.keysym == "KP_Delete":
         canvas.itemconfig(tagOrId=texte, text=nombre_actuel[:-1])
     elif event.keysym == "Return":
         reset_focus_cases(canvas, case)
@@ -137,7 +137,7 @@ def entree_focus_case(canvas: tk.Canvas, case: tuple[int], valeur_max: int,
     reset_focus_cases(canvas, *cases_grille)
     canvas.tag_raise(case_vide)
     canvas.tag_raise(texte)
-    canvas.itemconfig(tagOrId=case_vide, width=4)
+    canvas.itemconfig(tagOrId=case_vide, width=4, outline="#3185ED")
     canvas.bind_all(sequence="<KeyPress>", func=lambda event: 
                 modifier_valeur_case(event, canvas=canvas, case=case,
                                      valeur_max=valeur_max))
@@ -193,3 +193,77 @@ def creer_grille_sudoku(canvas: tk.Canvas, tag: str, coord: tuple[int], nb_case_
                              cases_grille=cases))
                     
     return (cases, carres)
+
+
+def creer_clavier_numerique(canvas: tk.Canvas, tag: str, coord: tuple[int], 
+                            largeur: int, hauteur: int):
+    
+    largeur_bouton: int = largeur // 3
+    hauteur_bouton: int = hauteur // 4
+
+    PARAMAS_BOUTON: dict[str, str, tuple[str, int]] = {
+        "bg" : "#ffffff", 
+        "fg" : "#000000", 
+        "font" : ("Century", 12), 
+    }
+
+    ANCHOR = tk.NW = tk.NW
+
+    bouton7: tk.Button = tk.Button(canvas, text="7", **PARAMAS_BOUTON)
+    canvas.create_window(coord, tags=tag, anchor=ANCHOR, width=largeur_bouton, 
+                         height=hauteur_bouton, window=bouton7)
+
+    bouton8: tk.Button = tk.Button(canvas, text="8", **PARAMAS_BOUTON)
+    canvas.create_window((coord[0] + largeur_bouton, coord[1]),  tags=tag,
+                          anchor=ANCHOR, width=largeur_bouton, height=hauteur_bouton, 
+                          window=bouton8)
+    
+    bouton9: tk.Button = tk.Button(canvas, text="9", **PARAMAS_BOUTON)
+    canvas.create_window((coord[0] + 2 *largeur_bouton, coord[1]),  tags=tag,
+                          anchor=ANCHOR, width=largeur_bouton, height=hauteur_bouton, 
+                          window=bouton9)
+    
+    bouton4: tk.Button = tk.Button(canvas, text="4", **PARAMAS_BOUTON)
+    canvas.create_window((coord[0], coord[1] + hauteur_bouton),  tags=tag,
+                          anchor=ANCHOR, width=largeur_bouton, height=hauteur_bouton, 
+                          window=bouton4)
+    
+    bouton5: tk.Button = tk.Button(canvas, text="5", **PARAMAS_BOUTON)
+    canvas.create_window((coord[0] + largeur_bouton, coord[1] + hauteur_bouton),  tags=tag,
+                          anchor=ANCHOR, width=largeur_bouton, height=hauteur_bouton, 
+                          window=bouton5)
+    
+    bouton6: tk.Button = tk.Button(canvas, text="6", **PARAMAS_BOUTON)
+    canvas.create_window((coord[0] + 2 * largeur_bouton, coord[1] + hauteur_bouton),  tags=tag,
+                          anchor=ANCHOR, width=largeur_bouton, height=hauteur_bouton, 
+                          window=bouton6)
+    
+    bouton1: tk.Button = tk.Button(canvas, text="1", **PARAMAS_BOUTON)
+    canvas.create_window((coord[0], coord[1] + 2 * hauteur_bouton),  tags=tag,
+                          anchor=ANCHOR, width=largeur_bouton, height=hauteur_bouton, 
+                          window=bouton1)
+    
+    bouton2: tk.Button = tk.Button(canvas, text="2", **PARAMAS_BOUTON)
+    canvas.create_window((coord[0] + largeur_bouton, coord[1] + 2 * hauteur_bouton),  tags=tag,
+                          anchor=ANCHOR, width=largeur_bouton, height=hauteur_bouton, 
+                          window=bouton2)
+    
+    bouton3: tk.Button = tk.Button(canvas, text="3", **PARAMAS_BOUTON)
+    canvas.create_window((coord[0] + 2 * largeur_bouton, coord[1] + 2 * hauteur_bouton),  tags=tag,
+                          anchor=ANCHOR, width=largeur_bouton, height=hauteur_bouton, 
+                          window=bouton3)
+    
+    bouton_suppr: tk.Button = tk.Button(canvas, text="Suppr", **PARAMAS_BOUTON)
+    canvas.create_window((coord[0], coord[1] + 3 * hauteur_bouton),  tags=tag,
+                          anchor=ANCHOR, width=3 * largeur_bouton, height=hauteur_bouton, 
+                          window=bouton_suppr)
+    
+    COULEUR_CADRE: str = "#000000"
+    EPAISSEUR_CADRE: int = 3
+
+    canvas.create_rectangle((coord[0] - EPAISSEUR_CADRE, coord[1] - EPAISSEUR_CADRE), 
+                            (coord[0] + 3 * largeur_bouton + EPAISSEUR_CADRE - 1, 
+                             coord[1] + 4 * hauteur_bouton + EPAISSEUR_CADRE - 1), 
+                            fill=COULEUR_CADRE, outline="")
+
+    
