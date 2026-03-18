@@ -159,6 +159,71 @@ def remplir_grille(dimension):
     
     return (grille)
 
+def remplir_grille_V2(dimension):
+
+    racine = int(math.sqrt(dimension))
+
+    grille = generateur_grille_vide(dimension)
+
+    liste_ligne = [[True]*dimension for _ in range(dimension)]
+    liste_colonne = [[True]*dimension for _ in range(dimension)]
+    liste_carre = [[True]*dimension for _ in range(dimension)]
+
+    essaie = [(i,e) for i in range(dimension) for e in range(dimension)]
+
+    def solveur():
+        if not essaie:
+            return True
+
+        indice_min = -1
+        valeurs_possibles_min = []
+        nb_valeurs_min = dimension + 1
+
+        for idx, (ligne, colonne) in enumerate(essaie):
+            numero_carre = (ligne//racine)*racine + (colonne//racine)
+            candidats = [v for v in range(dimension)
+                         if liste_ligne[ligne][v] and
+                            liste_colonne[colonne][v] and
+                            liste_carre[numero_carre][v]]
+
+            nb_valeurs = len(candidats)
+            if nb_valeurs < nb_valeurs_min:
+                nb_valeurs_min = nb_valeurs
+                valeurs_possibles_min = candidats
+                indice_min = idx
+            if nb_valeurs == 1:
+                break
+
+        if nb_valeurs_min == 0 or indice_min == -1:
+            return False
+
+        ligne, colonne = essaie.pop(indice_min)
+        numero_carre = (ligne//racine)*racine + (colonne//racine)
+        random.shuffle(valeurs_possibles_min)
+
+        for i in valeurs_possibles_min:
+            grille[ligne][colonne] = i + 1
+            liste_ligne[ligne][i] = False
+            liste_colonne[colonne][i] = False
+            liste_carre[numero_carre][i] = False
+
+            if solveur():
+                return True
+
+            # backtrack
+            grille[ligne][colonne] = 0
+            liste_ligne[ligne][i] = True
+            liste_colonne[colonne][i] = True
+            liste_carre[numero_carre][i] = True
+
+        essaie.insert(indice_min, (ligne, colonne))
+        return False
+
+    if solveur():  
+        return grille
+    else:
+        return None
+
 def supprimer_valeur(grille_complete, nombre_valeur_a_supprimer, dimension):
     grille_vider = copy.deepcopy(grille_complete)
     positions = [(ligne, colonne) for ligne in range(dimension) for colonne in range(dimension)]
