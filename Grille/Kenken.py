@@ -151,9 +151,9 @@ def générer_grille_KenKen(taille, max_case):
     
     return grille, cages_finales
 
-a = générer_grille_KenKen(5, 4)
+a = générer_grille_KenKen(6, 4)
 
-while vérification_Kenken.verifier_unicite_kenken(5, cages_finales, limite=2) != 1:
-    a = générer_grille_KenKen(5, 4)
+while vérification_Kenken.verifier_unicite_kenken(6, cages_finales, limite=2) != 1:
+    a = générer_grille_KenKen(6, 4)
 
 print(a)

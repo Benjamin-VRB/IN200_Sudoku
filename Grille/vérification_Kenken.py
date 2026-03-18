@@ -2,15 +2,15 @@ def verifier_unicite_kenken(dimension, cages, limite=2):
 
     compteur_de_solution = 0
 
-    liste_ligne = [[True]*dimension for _ in range(dimension)]
-    liste_colonne = [[True]*dimension for _ in range(dimension)]
+    liste_ligne = [[True]*dimension for _ in range(dimension)]  # Création d'une liste pour les termes des lignes.
+    liste_colonne = [[True]*dimension for _ in range(dimension)]  # Création d'une liste pour les termes des colonnes.
 
-    grille = [[0]*dimension for _ in range(dimension)]
+    grille = [[0]*dimension for k in range(dimension)]    # Création d'une matrice nulle.
 
-    essaie = [(i,j) for i in range(dimension) for j in range(dimension)]
+    essaie = [(i,j) for i in range(dimension) for j in range(dimension)]  # création s'une matrice d'essais...
 
 
-    def verifier_cage(cage):
+    def verifier_cage(cage):      # Fonction qui teste les opérations dans les cages.
 
         operation = cage["opération"]
         resultat = cage["résultat"]
@@ -18,30 +18,30 @@ def verifier_unicite_kenken(dimension, cages, limite=2):
 
         valeurs = []
 
-        for (i,j) in cases:
+        for (i,j) in cases:  
             if grille[i][j] == 0:
                 return True
             valeurs.append(grille[i][j])
 
-        if operation == "+":
+        if operation == "+":     # Test pour le cas d'une somme
             return sum(valeurs) == resultat
 
-        if operation == "*":
+        if operation == "*":     # Test pour le cas s'un produit
             produit = 1
             for v in valeurs:
                 produit *= v
             return produit == resultat
 
-        if operation == "-":
+        if operation == "-":     # Test pour le cas d'une différence
             a,b = valeurs
             return abs(a-b) == resultat
 
-        if operation == "/":
+        if operation == "/":     # test pour le cas d'un quotient
             a,b = valeurs
             return max(a,b) // min(a,b) == resultat
 
 
-    def cages_valides():
+    def cages_valides():   # Fonction qui vérifie vérifie la validité des cages.
 
         for cage in cages.values():
             if not verifier_cage(cage):
@@ -49,13 +49,13 @@ def verifier_unicite_kenken(dimension, cages, limite=2):
         return True
 
 
-    def solveur():
+    def solveur():        # Fonction qui compte le nombre de solutions de la grille générée
         nonlocal compteur_de_solution
 
-        if compteur_de_solution >= limite:
+        if compteur_de_solution >= limite: # Si la limite (de deux soltions) et atteinte, on s'arrête.
             return
 
-        if not essaie:
+        if not essaie:   # S'il n'y plus de solutions à tester, on s'arrête et on renvoie la valeur du compteur 
             compteur_de_solution += 1
             return
 
@@ -113,5 +113,3 @@ def verifier_unicite_kenken(dimension, cages, limite=2):
     solveur()
     return compteur_de_solution
 
-
-# on peut encore optimiser le solveur
