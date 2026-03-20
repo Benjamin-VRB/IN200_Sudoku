@@ -11,11 +11,21 @@ dictionnaire_liste_ligne = {}
 dictionnaire_liste_colonne = {}
 dictionnaire_liste_carre = {}
 
-def generateur_grille_vide(dimension): 
+def generateur_grille_vide(dimension : int): 
+    """
+    Génère une matrice vide à la dimension démandée  
+    """
     grille_vide = [[0] * dimension for i in range(dimension)]
     return(grille_vide)
 
-def initialiser_dictionnaires(dimension):
+def initialiser_dictionnaires(dimension : int):
+    """
+    Initialise les dictionnaires globaux contenant les valeurs possibles 
+    pour chaque ligne, colonne et carré.
+    
+    Chaque dictionnaire contient une liste de chiffres de 1 à 'dimension'.
+    Utilisé pour accélérer la recherche de candidats lors du remplissage
+    """
     racine = int(math.sqrt(dimension))
     carre = int(racine)
     
@@ -37,7 +47,8 @@ def initialiser_dictionnaires(dimension):
         for e in range(carre):
             dictionnaire_liste_carre[i][e] = list(range(1, dimension + 1))
 
-def initialiser_dictionnaires_variantes(dimension):
+def initialiser_dictionnaires_variantes(dimension : int):
+    
     
     global dictionnaire_liste_ligne
     global dictionnaire_liste_colonne
@@ -49,8 +60,10 @@ def initialiser_dictionnaires_variantes(dimension):
         dictionnaire_liste_ligne[i] = list(range(1, dimension + 1))
         dictionnaire_liste_colonne[i] = list(range(1, dimension + 1))
 
-def remplir_grille_variante(dimension):
-    
+def remplir_grille_variante(dimension : int):
+    """
+    Génère une grille complète en utilisant un backtracking itératif.
+    """
     grille = generateur_grille_vide(dimension)
     initialiser_dictionnaires(dimension)
     essais = [[[] for _ in range(dimension)] for _ in range(dimension)]  # valeurs déjà essayées par les cases
@@ -93,7 +106,7 @@ def remplir_grille_variante(dimension):
     
     return (grille)
 
-def generer_masque_kakuro(dimension, max_groupe=9):
+def generer_masque_kakuro(dimension, max_groupe=9): 
     """Génère un masque de Kakuro valide (0 = case blanche, 1 = case noire)."""
     grille = [[1 for _ in range(dimension)] for _ in range(dimension)]
     
@@ -112,55 +125,13 @@ def generer_masque_kakuro(dimension, max_groupe=9):
                 colonne += 1
     return grille
 
-def remplir_grille(dimension):
-    
-    racine = int(math.sqrt(dimension))
-    grille = generateur_grille_vide(dimension)
-    initialiser_dictionnaires(dimension)
-    essais = [[[] for _ in range(dimension)] for _ in range(dimension)]  # valeurs déjà essayées par les cases
-    ligne = 0
-    colonne = 0
-    
-    while ligne < dimension:
-        candidats = list(set(dictionnaire_liste_ligne[ligne]) & set(dictionnaire_liste_colonne[colonne]) & set(dictionnaire_liste_carre[ligne//racine][colonne//racine]) - set(essais[ligne][colonne])) # Candidats = intersection des listes disponibles en retirant les valeurs déjà essayées
-        
-        if not candidats: # Pas de candidat : on remet les essais à zéro pour cette case et on recule
-            essais[ligne][colonne] = []
-            
-            if colonne >= 1: # si on est pas sur la première colonne on recule de une colonne
-                colonne -= 1
-            
-            else: # sinon on remonte à la ligne de dessus et on se met sur la dernière colonne de la ligne
-                ligne -= 1
-                colonne = dimension - 1
-            
-            if ligne < 0: 
-                return None 
-            val_precedente = grille[ligne][colonne] # On rerajoute la valeur de la case précédente dans les listes
-            essais[ligne][colonne].append(val_precedente)  # on mémorise qu'elle a échoué
-            dictionnaire_liste_ligne[ligne].append(val_precedente) # on rerajoute la valeur testé dans les liste de choix possible car on retourne en arrière
-            dictionnaire_liste_carre[ligne//racine][colonne//racine].append(val_precedente)
-            dictionnaire_liste_colonne[colonne].append(val_precedente)
-            grille[ligne][colonne] = 0 
-        
-        else:
-            valeur = random.choice(candidats) # On choisit une valeur et on avance
-            grille[ligne][colonne] = valeur
-            dictionnaire_liste_ligne[ligne].remove(valeur) # on retire la valeur tenté des choix possibles
-            dictionnaire_liste_colonne[colonne].remove(valeur)
-            dictionnaire_liste_carre[ligne//racine][colonne//racine].remove(valeur)
-            
-            if colonne == dimension - 1: 
-                ligne += 1
-                colonne = 0
-            
-            else:
-                colonne += 1
-    
-    return (grille)
+def remplir_grille_V2(dimension : int):
+    """
+    Génère une grille de Sudoku complète en utilisant une stratégie de 
+    Backtracking optimisée.
 
-def remplir_grille_V2(dimension):
-
+    L'optimisation réside dans le choix des cases à traiter : en prenant celle qui à le moins de chiffres possibles.
+    """
     racine = int(math.sqrt(dimension))
 
     grille = generateur_grille_vide(dimension)
@@ -224,8 +195,67 @@ def remplir_grille_V2(dimension):
     else:
         return None
 
-def supprimer_valeur(grille_complete, nombre_valeur_a_supprimer, dimension):
-    grille_vider = copy.deepcopy(grille_complete)
+def remplir_grille(dimension : int):
+    
+    racine = int(math.sqrt(dimension))
+    grille = generateur_grille_vide(dimension)
+    initialiser_dictionnaires(dimension)
+    essais = [[[] for _ in range(dimension)] for _ in range(dimension)]  # valeurs déjà essayées par les cases
+    ligne = 0
+    colonne = 0
+    
+    while ligne < dimension:
+        candidats = list(set(dictionnaire_liste_ligne[ligne]) & set(dictionnaire_liste_colonne[colonne]) & set(dictionnaire_liste_carre[ligne//racine][colonne//racine]) - set(essais[ligne][colonne])) # Candidats = intersection des listes disponibles en retirant les valeurs déjà essayées
+        
+        if not candidats: # Pas de candidat : on remet les essais à zéro pour cette case et on recule
+            essais[ligne][colonne] = []
+            
+            if colonne >= 1: # si on est pas sur la première colonne on recule de une colonne
+                colonne -= 1
+            
+            else: # sinon on remonte à la ligne de dessus et on se met sur la dernière colonne de la ligne
+                ligne -= 1
+                colonne = dimension - 1
+            
+            if ligne < 0: 
+                return None 
+            val_precedente = grille[ligne][colonne] # On rerajoute la valeur de la case précédente dans les listes
+            essais[ligne][colonne].append(val_precedente)  # on mémorise qu'elle a échoué
+            dictionnaire_liste_ligne[ligne].append(val_precedente) # on rerajoute la valeur testé dans les liste de choix possible car on retourne en arrière
+            dictionnaire_liste_carre[ligne//racine][colonne//racine].append(val_precedente)
+            dictionnaire_liste_colonne[colonne].append(val_precedente)
+            grille[ligne][colonne] = 0 
+        
+        else:
+            valeur = random.choice(candidats) # On choisit une valeur et on avance
+            grille[ligne][colonne] = valeur
+            dictionnaire_liste_ligne[ligne].remove(valeur) # on retire la valeur tenté des choix possibles
+            dictionnaire_liste_colonne[colonne].remove(valeur)
+            dictionnaire_liste_carre[ligne//racine][colonne//racine].remove(valeur)
+            
+            if colonne == dimension - 1: 
+                ligne += 1
+                colonne = 0
+            
+            else:
+                colonne += 1
+    
+    return (grille)
+
+def supprimer_valeur(grille_complete : list[list:int], nombre_valeur_a_supprimer : int, dimension : int):
+    """
+    Transforme notre grille pleine en un sudoku à remplir.
+    Tout en s'assurant que le joueur n'aura toujours qu'une seule solution possible.
+
+    Entrée : 
+        grille_a_vider: Une grille de Sudoku complète.
+        nombre_valeurs_a_supprimer: Le nombre de cases que l'on veut vider.
+        dimension : taille de notre grille
+    Sortie : 
+        grille_vidée : Une grille de Sudoku prête à être resolue par l'utilisateur
+    """
+    
+    grille_vidée = copy.deepcopy(grille_complete)
     positions = [(ligne, colonne) for ligne in range(dimension) for colonne in range(dimension)]
     random.shuffle(positions)
 
@@ -237,18 +267,18 @@ def supprimer_valeur(grille_complete, nombre_valeur_a_supprimer, dimension):
             if (nombre_valeur_a_supprimer - nombre_case_supprime) > 5:   
                 return supprimer_valeur(remplir_grille(dimension), nombre_valeur_a_supprimer, dimension)
             else:
-                return grille_vider
+                return grille_vidée
 
         ligne, colonne = positions.pop()
-        valeur_originale = grille_vider[ligne][colonne]
-        grille_vider[ligne][colonne] = 0
+        valeur_originale = grille_vidée[ligne][colonne]
+        grille_vidée[ligne][colonne] = 0
 
-        if compter_solution_V3(grille_vider, dimension) == 1:
+        if compter_solution_V3(grille_vidée, dimension) == 1:
             nombre_case_supprime += 1
         else:
-            grille_vider[ligne][colonne] = valeur_originale
+            grille_vidée[ligne][colonne] = valeur_originale
 
-    return grille_vider
+    return grille_vidée
 
 def calculer_sommes(solution, groupes):
     return [sum(solution[i][j] for (i,j) in g) for g in groupes]
