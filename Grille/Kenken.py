@@ -119,41 +119,38 @@ def générer_grille_KenKen(taille, max_case):
         else:
             opération =random.choice(["+", "*"])
 
-        if opération == "+":
+        if opération == "+":   # Si le + a été choisit, on effectue cette opération dans la cage et on la garde en mémoire dans le dictionnaire correspondant.
             compteur = 0
             for j in position:
                 k, l = j
                 compteur += grille[k][l]
             cages_finales["cage" + str(cages.index(position) + 1)] = {"opération" : "+", "résultat" : compteur, "cases": position}
 
-        if opération == "*":
+        if opération == "*":  # Si le * a été choisit, on effectue cette opération dans la cage et on la garde en mémoire dans le dictionnaire correspondant.
             compteur = 1
             for j in position:
                 k, l = j
                 compteur *= grille[k][l]
             cages_finales["cage" + str(cages.index(position) + 1)] = {"opération" : "*", "résultat" : compteur, "cases": position}
 
-        if opération == "-":
+        if opération == "-":   # Si le - a été choisit, on effectue cette opération dans la cage et on la garde en mémoire dans le dictionnaire correspondant.
             a = grille[position[0][0]][position[0][1]]
             b = grille[position[1][0]][position[1][1]]
             compteur = max(a,b) - min(a,b)
             cages_finales["cage" + str(cages.index(position) + 1)] = {"opération": "-", "résultat": compteur, "cases": position}
 
 
-        if opération == "/":
+        if opération == "/":   # Si le / a été choisit, on effectue cette opération dans la cage et on la garde en mémoire dans le dictionnaire correspondant.
             a = grille[position[0][0]][position[0][1]]
             b = grille[position[1][0]][position[1][1]]
             compteur = max(a,b) / min(a,b)  
             cages_finales["cage" + str(cages.index(position) + 1)] = {"opération": "/", "résultat": compteur, "cases": position}
-    
-    global grille_générée
-    grille_générée = grille
-    
+
     return grille, cages_finales
 
-a = générer_grille_KenKen(6, 4)
+a = générer_grille_KenKen(5, 4)
 
-while verification_kenken.verifier_unicite_kenken(6, cages_finales, limite=2) != 1:
-    a = générer_grille_KenKen(6, 4)
+while verification_kenken.verifier_unicite_kenken(5, cages_finales, limite=2) != 1:
+    a = générer_grille_KenKen(5, 4)
 
 print(a)

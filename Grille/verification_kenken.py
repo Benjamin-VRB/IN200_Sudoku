@@ -1,3 +1,142 @@
+"""def verifier_unicite_kenken(dimension, cages, limite=2):
+
+    compteur = 0
+
+    grille = [[0]*dimension for _ in range(dimension)]
+
+    lignes = [[True]*dimension for _ in range(dimension)]
+    colonnes = [[True]*dimension for _ in range(dimension)]
+
+    cases_vides = [(i, j) for i in range(dimension) for j in range(dimension)]
+
+    # 🔥 associer chaque case à sa cage
+    case_vers_cage = {}
+    for cage in cages.values():
+        for case in cage["cases"]:
+            case_vers_cage[case] = cage
+
+    # 🔥 vérifier UNE seule cage
+    def verifier_cage(i, j):
+
+        cage = case_vers_cage[(i, j)]
+        op = cage["opération"]
+        res = cage["résultat"]
+
+        valeurs = []
+        vide = 0
+
+        for (x, y) in cage["cases"]:
+            v = grille[x][y]
+            if v == 0:
+                vide += 1
+            else:
+                valeurs.append(v)
+
+        # ➕
+        if op == "+":
+            s = sum(valeurs)
+            if s > res:
+                return False
+            if vide == 0:
+                return s == res
+            return True
+
+        # ✖️
+        if op == "*":
+            p = 1
+            for v in valeurs:
+                p *= v
+            if p > res:
+                return False
+            if vide == 0:
+                return p == res
+            return True
+
+        # ➖
+        if op == "-":
+            if vide > 0:
+                return True
+            a, b = valeurs
+            return abs(a - b) == res
+
+        # ➗
+        if op == "/":
+            if vide > 0:
+                return True
+            a, b = valeurs
+            return max(a,b) % min(a,b) == 0 and max(a,b)//min(a,b) == res
+
+        return True
+
+    # 🔥 choisir la meilleure case (MRV)
+    def choisir_case():
+        best = None
+        min_nb = dimension + 1
+        best_vals = None
+
+        for (i, j) in cases_vides:
+
+            vals = []
+            for v in range(dimension):
+                if lignes[i][v] and colonnes[j][v]:
+                    vals.append(v+1)
+
+            if not vals:
+                return None, None
+
+            if len(vals) < min_nb:
+                min_nb = len(vals)
+                best = (i, j)
+                best_vals = vals
+
+            if min_nb == 1:
+                break
+
+        return best, best_vals
+
+    def solve():
+        nonlocal compteur
+
+        if compteur >= limite:
+            return
+
+        if not cases_vides:
+            compteur += 1
+            return
+
+        case, valeurs = choisir_case()
+
+        if case is None:
+            return
+
+        i, j = case
+        cases_vides.remove(case)
+
+        for v in valeurs:
+
+            # placer
+            grille[i][j] = v
+            lignes[i][v-1] = False
+            colonnes[j][v-1] = False
+
+            if verifier_cage(i, j):
+                solve()
+
+            # enlever
+            grille[i][j] = 0
+            lignes[i][v-1] = True
+            colonnes[j][v-1] = True
+
+            if compteur >= limite:
+                break
+
+        cases_vides.append(case)
+
+    solve()
+    return compteur
+
+"""
+
 def verifier_unicite_kenken(dimension, cages, limite=2):
 
     compteur_de_solution = 0
@@ -52,7 +191,7 @@ def verifier_unicite_kenken(dimension, cages, limite=2):
     def solveur():        # Fonction qui compte le nombre de solutions de la grille générée
         nonlocal compteur_de_solution
 
-        if compteur_de_solution >= limite: # Si la limite (de deux soltions) et atteinte, on s'arrête.
+        if compteur_de_solution >= limite: # Si la limite (de deux solutions) et atteinte, on s'arrête.
             return
 
         if not essaie:   # S'il n'y plus de solutions à tester, on s'arrête et on renvoie la valeur du compteur 
@@ -112,4 +251,3 @@ def verifier_unicite_kenken(dimension, cages, limite=2):
 
     solveur()
     return compteur_de_solution
-
