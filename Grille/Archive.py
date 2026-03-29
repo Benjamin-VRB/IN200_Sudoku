@@ -284,5 +284,52 @@ def print_kakuro(grid, horizontal_sums, vertical_sums):
                 else:
                     line += ".\t"
         print(line)
+
+    def remplir_grille(dimension : int):
+    
+    racine = int(math.sqrt(dimension))
+    grille = generateur_grille_vide(dimension)
+    initialiser_dictionnaires(dimension)
+    essais = [[[] for _ in range(dimension)] for _ in range(dimension)]  # valeurs déjà essayées par les cases
+    ligne = 0
+    colonne = 0
+    
+    while ligne < dimension:
+        candidats = list(set(dictionnaire_liste_ligne[ligne]) & set(dictionnaire_liste_colonne[colonne]) & set(dictionnaire_liste_carre[ligne//racine][colonne//racine]) - set(essais[ligne][colonne])) # Candidats = intersection des listes disponibles en retirant les valeurs déjà essayées
+        
+        if not candidats: # Pas de candidat : on remet les essais à zéro pour cette case et on recule
+            essais[ligne][colonne] = []
+            
+            if colonne >= 1: # si on est pas sur la première colonne on recule de une colonne
+                colonne -= 1
+            
+            else: # sinon on remonte à la ligne de dessus et on se met sur la dernière colonne de la ligne
+                ligne -= 1
+                colonne = dimension - 1
+            
+            if ligne < 0: 
+                return None 
+            val_precedente = grille[ligne][colonne] # On rerajoute la valeur de la case précédente dans les listes
+            essais[ligne][colonne].append(val_precedente)  # on mémorise qu'elle a échoué
+            dictionnaire_liste_ligne[ligne].append(val_precedente) # on rerajoute la valeur testé dans les liste de choix possible car on retourne en arrière
+            dictionnaire_liste_carre[ligne//racine][colonne//racine].append(val_precedente)
+            dictionnaire_liste_colonne[colonne].append(val_precedente)
+            grille[ligne][colonne] = 0 
+        
+        else:
+            valeur = random.choice(candidats) # On choisit une valeur et on avance
+            grille[ligne][colonne] = valeur
+            dictionnaire_liste_ligne[ligne].remove(valeur) # on retire la valeur tenté des choix possibles
+            dictionnaire_liste_colonne[colonne].remove(valeur)
+            dictionnaire_liste_carre[ligne//racine][colonne//racine].remove(valeur)
+            
+            if colonne == dimension - 1: 
+                ligne += 1
+                colonne = 0
+            
+            else:
+                colonne += 1
+    
+    return (grille)
     print()
 
