@@ -4,7 +4,7 @@ import verification_kenken
 dictionnaire_liste_ligne = {}
 dictionnaire_liste_colonne = {}
 
-def generateur_grille_vide(nombre_de_valeur): 
+def generateur_grille_vide(nombre_de_valeur):       # Fonction qui génère une grille de dimenseion quelconque.
     grille_vide = [[0] * nombre_de_valeur for i in range(nombre_de_valeur)]
     return(grille_vide)
 def initialiser_dictionnaires(nombre_de_valeur):
@@ -148,9 +148,9 @@ def générer_grille_KenKen(taille, max_case):
 
     return grille, cages_finales
 
-a = générer_grille_KenKen(5, 4)
+a = générer_grille_KenKen(6, 4)
 
-while verification_kenken.verifier_unicite_kenken(5, cages_finales, limite=2) != 1:
-    a = générer_grille_KenKen(5, 4)
+while verification_kenken.verifier_unicite_kenken(6, cages_finales, limite=2) != 1:
+    a = générer_grille_KenKen(6, 4)
 
 print(a)
