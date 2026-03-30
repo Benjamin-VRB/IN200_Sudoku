@@ -168,19 +168,18 @@ def remplir_grille_V2(dimension : int):
     else:
         return None
         
-def supprimer_valeur(grille_complete : list[list:int], nombre_valeur_a_supprimer : int, dimension : int):
+def supprimer_valeur(nombre_valeur_a_supprimer : int, dimension : int):
     """
     Transforme notre grille pleine en un sudoku à remplir.
     Tout en s'assurant que le joueur n'aura toujours qu'une seule solution possible.
 
     Entrée : 
-        grille_a_vider: Une grille de Sudoku complète.
         nombre_valeurs_a_supprimer: Le nombre de cases que l'on veut vider.
         dimension : taille de notre grille
     Sortie : 
         grille_vidée : Une grille de Sudoku prête à être resolue par l'utilisateur
     """
-    
+    grille_complet = remplir_grille_V2(dimension)
     grille_vidée = copy.deepcopy(grille_complete)
     positions = [(ligne, colonne) for ligne in range(dimension) for colonne in range(dimension)]
     random.shuffle(positions)
