@@ -1,6 +1,6 @@
 import math
 
-def verification_condition_sudoku( grille: list[list[int]], dimension: int, coord: tuple[int, int]):
+def verification_condition_sudoku( grille: list[list[int]], coord: tuple[int, int]):
     """Vérifie que la valeur de la case venant 'être saisie vérifie les règles du sudoku.
     
     Entrée:
@@ -10,6 +10,7 @@ def verification_condition_sudoku( grille: list[list[int]], dimension: int, coor
     Sortie:
         Liste des coordonnées des cases pour lesquelles cela les règles du sudoku ne sont pas respectées."""
    
+    dimension = len(grille)
     liste_cases_invalides = []     
 
     ligne = coord[0]
