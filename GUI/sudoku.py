@@ -4,7 +4,7 @@ from GUI.fenetre import LARGEUR_PIXEL_FENETRE, HAUTEUR_PIXEL_FENETRE
 from GUI.animations import mouvement_exterieur_fond_menu, retour_menu
 from GUI.widgets import creer_grille_sudoku, creer_boutton, survole_non_survole, remplir_grille_sudoku_GUI
 
-from Grille.generation import remplir_grille_V2, supprimer_valeur
+from Grille.Sudoku import supprimer_valeur
 
 
 def aller_sudoku(canvas: tk.Canvas) -> None:
@@ -24,9 +24,8 @@ def aller_sudoku(canvas: tk.Canvas) -> None:
     grille: tuple[list[tuple[int, int]], list[int]] = \
         creer_grille_sudoku(canvas, tag=TAG, coord=(X_GRILLE, Y_GRILLE), nb_case_cote=NB_CASE_COTE, 
                             longueur_cote_case=LONGUEUR_COTE_CASE, nb_carre_cote=NB_CARRE_COTE)
-    grille_valeur_remplie = remplir_grille_V2(dimension=NB_CASE_COTE)
-    grille_valeur: list[list[int]] = supprimer_valeur(grille_complete=grille_valeur_remplie, 
-                                                      nombre_valeur_a_supprimer=50, dimension=NB_CASE_COTE)
+    grille_valeur: list[list[int]] = supprimer_valeur(nombre_valeur_a_supprimer=60, 
+                                                      dimension=NB_CASE_COTE)
     remplir_grille_sudoku_GUI(canvas, cases=grille[0], grille_valeur=grille_valeur)
     
     PARAMS_BOUTON: dict[str, int | str | tuple[str, int]] = {
