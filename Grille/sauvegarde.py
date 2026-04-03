@@ -1,12 +1,12 @@
 import json 
 
-fichier_sauvergarde = "Sauvegardes/grilles_jouees.json"
-fichier_sauvergarde_tempo = "Sauvegardes/grilles_en_cours.json"
+FICHIER_SAUVEGARDE = "Sauvegardes/grilles_jouees.json"
+FICHIER_SAUVEGARDE_TEMPO = "Sauvegardes/grilles_en_cours.json"
 
 def sauvegarde (grille, temps, difficulte, score):
     
     #On charge l'historique
-    lecture=open(fichier_sauvergarde, "r")
+    lecture=open(FICHIER_SAUVEGARDE, "r")
     liste_parties = json.load(lecture)
     lecture.close()
     
@@ -25,7 +25,7 @@ def sauvegarde (grille, temps, difficulte, score):
     liste_parties=liste_parties[:100]
 
     #On sauvegarde notre fichier 
-    ecriture = open(fichier_sauvergarde,"w")
+    ecriture = open(FICHIER_SAUVEGARDE,"w")
     json.dump(liste_parties,ecriture,indent=4)
     ecriture.close()
 
@@ -40,7 +40,7 @@ def sauvegarde_progression(grille_actuelle,grille_solution,temps):
         "etat" : "en_cours"
     }
     
-    ecriture = open(fichier_sauvergarde_tempo,"w")
+    ecriture = open(FICHIER_SAUVEGARDE_TEMPO,"w")
     json.dump(donnee,ecriture)
     ecriture.close()
     
@@ -55,7 +55,7 @@ def reinitialisation():
         "etat" : "vide"
     }
 
-    ecriture = open(fichier_sauvergarde_tempo,"w")
+    ecriture = open(FICHIER_SAUVEGARDE_TEMPO,"w")
     json.dump(donnee,ecriture)
     ecriture.close()
 
@@ -63,7 +63,7 @@ def reinitialisation():
 
 def charger_sauvegarde():
 
-    lecture=open(fichier_sauvergarde_tempo, "r")
+    lecture=open(FICHIER_SAUVEGARDE_TEMPO, "r")
     donnee = json.load(lecture)
     lecture.close()
 
